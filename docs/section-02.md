@@ -368,8 +368,11 @@ spring:
             - AddResponseHeader=second-response, second-response-header2
 ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6bd3a047-7e0b-4bfe-be15-eb34419d5871" width="70%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d6ea5e31-2350-4bd2-aaed-b06b8a207671" width="80%"/><br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/aa5469ff-e219-4fa7-ac50-d1c65a02fb14" width="80%"/><br>
+- postman 테스트
 
 <br> 
 
