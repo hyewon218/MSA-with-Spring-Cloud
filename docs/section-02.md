@@ -480,8 +480,13 @@ public class SecondServiceController {
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c8adf2e1-84f7-4677-b5ef-5626f14029e4" width="80%"/><br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/63c4701e-6d63-4d42-806c-564c7c882f49" width="70%"/><br>
 
+<br>
+
 ## Spring Cloud Gateway - Global Filter
-앞에서 실습한 Custom Filter 와 만드는 방법과 동일하다. 단, 어떤 라우트 정보가 실행된다고 하더라도 공통적으로 실행되는 공통필터
+앞에서 실습한 Custom Filter 와 만드는 방법과 동일하다. <br>
+단, 어떤 라우트 정보가 실행된다고 하더라도 공통적으로 실행되는 **공통필터**
+
+(Custom Filter 는 원하는 라우트 정보에 개별적으로 다 등록을 해야만 한다.) 
 
 ```java
 @Component
@@ -513,7 +518,7 @@ public class GlobalFilter extends AbstractGatewayFilterFactory<GlobalFilter.Conf
     }
 
     @Data
-    public static class Config {
+    public static class Config { //inner class
 
         private String baseMessage;
         private boolean preLogger;
@@ -522,7 +527,8 @@ public class GlobalFilter extends AbstractGatewayFilterFactory<GlobalFilter.Conf
     }
 }
 ```
-Config.class 의 변수의 초기화는 application.yml 파일에서 처리
+Config.class 의 변수의 초기화는 `application.yml` 파일에서 처리<br>
+
 ```yaml
 
 ... 
@@ -555,13 +561,18 @@ spring:
             preLogger: true
             postLogger: true
 ```
-- GlobalFilter는 모든 필터 중 가장 먼저 시작되고 가장 마지막 종료된다.
+- GlobalFilter는 모든 필터 중 가장 먼저 시작되고 가장 마지막 종료된다.<br>
+  <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d2683ef7-8bd5-4c86-a907-bf6808f878fe" width="70%"/><br>
+  <br>
+  <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/f83513a6-4817-42d9-ba3a-6caec3caa5a6" width="100%"/><br>
+  - 글로벌 필터가 종료되기 전에 커스텀 필터가 실행된다. 
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-
-뒤에서 환경 설정 정보(application.yml)을 다루는 내용을 배우는데 현재는 yml 이 프로젝트에 내장되어 있는데, 내장되어 있으므로 변경 시 값을 바꾼 뒤 다시 빌드, 배포, 패키징하는 과정을 해야한다.
+뒤에서 환경 설정 정보(application.yml)을 다루는 내용을 배우는데 현재는 yml 이 프로젝트에 내장되어 있는데,<br> 
+내장되어 있으므로 변경 시 값을 바꾼 뒤 다시 빌드, 배포, 패키징하는 과정을 해야한다.<br>
 
 yml 이 프로젝트 외부에 존재한다면 수행 중인 Microservice 는 갱신되지 않을 수 있다. 따라서 설정과 실행을 분리하는게 좋다.
+
+<br>
 
 ## Spring Cloud Gateway - Custom Filter (Logging)
 ```java
