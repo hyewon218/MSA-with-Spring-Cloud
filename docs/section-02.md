@@ -408,11 +408,13 @@ public class CustomFilter extends AbstractGatewayFilterFactory<CustomFilter.Conf
     }
 }
 ```
-- apply(): 수행하고자 하는 내용
-  - chain 형태로 작동
+- `apply()`: 수행하고자 하는 내용
+  - 람다식의 인자값으로 exchange, chain 객체를 받는다.
+  - chain(반환) 형태로 작동
   - 예를 들어 pre filter 에서 사용자 로그인 시 받은 JWT 를 검증할 수 있다.
-  - 첫번째 매개변수인 exchange 를 통해, ServerHttpRequest, ServerHttpResponse 를 가져올 수 있다.
-    - Netty 라는 비동기 내장 서버이므로 ServletRequest, ServletResponse 가 아닌 ServerHttpRequest, ServerHttpResponse 를 사용해야 한다.
+  - 첫번째 매개변수인 `exchange` 를 통해, ServerHttpRequest, ServerHttpResponse 를 가져올 수 있다.
+    - Mono 라는 객체는 `WebFlux` 라고 해서 스프링5에서 추가된 기능이다. (비동기 방식으로 서버를 지원할 때 단일값 전달)
+    - `Netty` 라는 비동기 내장 서버이므로 ServletRequest, ServletResponse 가 아닌 `ServerHttpRequest`, `ServerHttpResponse` 를 사용해야 한다.
   - then()은 종료되기 전에 수행할 내용
 
 ```yaml
@@ -452,16 +454,10 @@ public class FirstServiceController {
 
  ...
 
-    @GetMapping("/check")
-    public String check(HttpServletRequest request) {
-        log.info("Server port={}", request.getServerPort());
-
-        log.info("spring.cloud.client.hostname={}", env.getProperty("spring.cloud.client.hostname"));
-        log.info("spring.cloud.client.ip-address={}", env.getProperty("spring.cloud.client.ip-address"));
-
-        return String.format("Hi, there. This is a message from First Service on PORT %s"
-                , env.getProperty("local.server.port"));
-    }
+  @GetMapping("/check")
+  public String check() {
+    return "Hi, there. This is a message from First Service.";
+  }
 
 }
 ```
@@ -481,8 +477,8 @@ public class SecondServiceController {
 }
 ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c8adf2e1-84f7-4677-b5ef-5626f14029e4" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/63c4701e-6d63-4d42-806c-564c7c882f49" width="70%"/><br>
 
 ## Spring Cloud Gateway - Global Filter
 앞에서 실습한 Custom Filter 와 만드는 방법과 동일하다. 단, 어떤 라우트 정보가 실행된다고 하더라도 공통적으로 실행되는 공통필터
