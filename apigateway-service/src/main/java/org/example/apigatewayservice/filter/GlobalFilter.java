@@ -1,8 +1,8 @@
-package org.example.apigatewayservice.config;
+package org.example.apigatewayservice.filter;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.example.apigatewayservice.config.GlobalFilter.Config;
+import org.example.apigatewayservice.filter.GlobalFilter.Config;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;

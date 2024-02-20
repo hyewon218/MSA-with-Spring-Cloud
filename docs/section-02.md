@@ -650,12 +650,14 @@ spring:
                 postLogger: true
 ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/37a60b4e-2f5a-4db7-babb-4326bdb926ac" width="90%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/85bb4bee-8f7f-4489-b398-292f7e76390d" width="80%"/><br>
 
 - Gateway Handler 를 통해서 어떤 요청인지 판단
 - Global -> Custom -> Logging 순서로 시작되고 Logging -> Custom -> Global을 순서로 종료된다.
 - Proxied Service 는 지금 first-service 와 second-service
+
+<br>
 
 #### 람다식을 풀어서 설명
 ```java
@@ -667,6 +669,7 @@ spring:
             ServerHttpResponse response = exchange.getResponse();
 
             log.info("Logging Filter baseMessage {}", config.getBaseMessage());
+            
             if (config.isPreLogger()) {
                 log.info("Logging Filter Start: request uri -> {}", request.getURI());
             }
@@ -683,21 +686,23 @@ spring:
 
     }
 ```
-
-new OrderedGatewayFilter(): 해당 구현체는 생성자로 GatewayFilter 와 순서에 해당하는 order 를 받는다.
+`new OrderedGatewayFilter()`: 해당 구현체는 생성자로 GatewayFilter 와 순서에 해당하는 Ordered 를 받는다.
 
 - 해당 구현체는 GatewayFilter 를 implements 하므로 filter 를 정의한다.
-- Spring 의 Web Flux 를 사용하므로 ServerRequest, ServerResponse 를 사용해야하는데 두 가지 인스턴스를 사용하도록 도와주는 것이 ServerWebExchange 객체이다.
-- GatewayFilterChain 객체를 통해 다양한 필터(pre-filter, post-filter)들을 연결해준다.
+- Spring 의 `WebFlux` 를 사용하므로 ServerRequest, ServerResponse 를 사용해야하는데<br>
+  두 가지 인스턴스를 사용하도록 도와주는 것이 `ServerWebExchange` 객체이다.
+- `GatewayFilterChain` 객체를 통해 다양한 필터(pre-filter, post-filter)들을 연결해준다.<br>
+   <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/44c29d5a-eacf-4675-8c61-4f87f1f1eb39" width="60%"/><br>
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ba148a3b-a239-4099-a833-7b44d54ea26c" width="80%"/><br>
 
 - 순서가 달라졌다 ?
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/891a10a1-b806-4dab-a03b-45b4b87d4acc" width="60%"/><br>
 
 - 위의 order 파라미터 때문이다.
+
+<br>
 
 ## Spring Cloud Gateway - Eureka 연동
 Eureka 라는 네이밍 서비스에 Spring Cloud Gateway 를 등록
