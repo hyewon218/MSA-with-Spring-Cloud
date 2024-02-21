@@ -701,15 +701,17 @@ spring:
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/891a10a1-b806-4dab-a03b-45b4b87d4acc" width="60%"/><br>
 
 - 위의 order 파라미터 때문이다.
+- 현재 필터 우선순위 가장 높게
 
 <br>
 
 ## Spring Cloud Gateway - Eureka 연동
 Eureka 라는 네이밍 서비스에 Spring Cloud Gateway 를 등록
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/85cf31d8-4fcf-4251-83a1-25c21d0d7f2f" width="80%"/><br>
 
-클라이언트에서 API gateway 를 통과해서 요청 정보를 보내게 되면 유레카 서버로 전달되어 해당 요청을 분석해서 마이크로서비스의 위치정보를 전달 받아서 해당 정보를 통해 포워딩이 이뤄진다.
+클라이언트에서 API gateway 를 통과해서 요청 정보를 보내게 되면 유레카 서버로 전달되어 해당 요청을 분석해서<br> 
+마이크로서비스의 위치정보를 전달 받아서 해당 정보를 통해 포워딩이 이뤄진다.
 
 ```yaml
 spring:
@@ -751,15 +753,17 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4a65c5c4-3353-44cb-95e4-a1bd34016617" width="40%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5e6f7017-61f3-4db3-886a-b1cfea3d5bf1" width="40%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/39d29e70-4830-41d1-a452-4cae2ec3217c" width="80%"/><br>
+
+<br>
 
 ## Spring Cloud Gateway - Load Balancer
 인텔리제이에서 서버 2개 이상 기동하는 방법
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/b70b1fef-31b5-4f5b-b3ed-b0fe74c25159" width="70%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/859c29a9-88d4-4263-b370-c09265648d3c" width="80%"/><br>
 
 현재 first, second 서비스 모두 2개씩 기동 중인 상태 해당 url로 요청이 들어오면 어디로 로드 밸런싱?
 랜덤 포트 적용
@@ -811,5 +815,6 @@ public class FirstServiceController {
 }
 ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c9735829-66d6-4673-b44a-7bfa1536cbc6" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/21f6bf14-c449-4493-9b6e-ed540167d590" width="70%"/><br>
 

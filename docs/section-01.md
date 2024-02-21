@@ -13,6 +13,14 @@ PC가 한 대라면 port 를 나눠서 사용하고, PC가 3대라면 같은 por
 > 서버의 등록과 검색을 해주는 서비스, 외부에서 다른 서비스들이 Microservice 를 검색하기 위해서 사용되는 개념 <br>
 > 일종의 전화부책 -> 예를 들어 key, value 로 저장된다면 key 에는 서버 이름 value 에는 ip와 같은 위치정보
 
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d40d5556-398c-4031-83b1-6d22c0236ab6" width="60%"/><br>
+
+Microservice 를 사용하고자하는 클라이언트에서 필요한 요청 정보를 Load Balancer 또는 API Gateway 에 요청 정보를 전달하면<br> 
+해당 정보를 `Service Discovery` 에 전달하여 필요한 서버 정보를 반환해주는 것이다.<br>
+
+따라서 `Service Discovery` 의 역할은 각각의 Microservice 가 어디에 저장되어있으며<br> 
+요청 정보가 들어왔을 때 요청 정보에 따라서 필요한 서비스의 위치를 알려주는 역할을 한다.
+
 <br>
 
 ## Eureka Service Discovery - 프로젝트 생성 (discovery-service)
