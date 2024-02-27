@@ -740,11 +740,17 @@ spring:
             - Path=/second-service/**
 ```
 
-- uri 를 보면 lb(load balancer) 뒤에 네이밍 서비스(유레카 서비스)에 등록된 인스턴스 이름을 적어줌을 볼 수 있다.
+- uri 를 보면 `lb(load balancer)` 뒤에 네이밍 서비스(유레카 서비스)에 등록된 인스턴스 이름을 적어준다.
+- `uri: lb://MY-FIRST-SERVICE` -> localhost:8081,8082 가 아닌 Eureka 서버 가서 클라이언트 요청 정보를 전달해 준다.
+- first-service 로 요청이 들어오면 lb://MY-FIRST-SERVICE 로 포워딩
 
 #### first-service, second-service 유레카 등록
 ```yaml
 ...
+spring:
+  application:
+    name: my-first-service
+
 eureka:
   client:
     register-with-eureka: true
@@ -763,10 +769,16 @@ eureka:
 인텔리제이에서 서버 2개 이상 기동하는 방법
 
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/b70b1fef-31b5-4f5b-b3ed-b0fe74c25159" width="70%"/><br>
+- 스프링부트 3.2.2, java 17 로 터미널에서 mvn 명령어 입력하면 java 17 지원하지 않는다며 오류,
+- <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6d5e71a8-22b2-4ff0-9e0d-1903f197c661" width="100%"/><br>
+- <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/291bfc8e-1805-4202-b3fe-2886d6a31d6e" width="20%"/><img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d93e2bdd-3b28-411a-ac6a-8fdd8ffacd76" width="20%"/><br>
+- 성공
+
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/859c29a9-88d4-4263-b370-c09265648d3c" width="80%"/><br>
 
 현재 first, second 서비스 모두 2개씩 기동 중인 상태 해당 url로 요청이 들어오면 어디로 로드 밸런싱?
-랜덤 포트 적용
+
+### 랜덤 포트 적용
 ```yaml
 server:
   port: 0
@@ -785,8 +797,15 @@ eureka:
     instance-id: ${spring.cloud.client.ip-address}:${spring.application.instance_id:${random.value}}
     prefer-ip-address: true
 ```
+- 0 으로 번경하면 여러개를 실행시킨다 하더라도 목록에는 하나밖에 표시가 안 되기 때문에 instance id 값을 부여하는 옵션 추가
+- ```yaml
+    instance:
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+  ```
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6642a7f6-4ac4-48fe-ba2d-342c9a652b82" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6b7cdc89-7e74-4b86-a9c4-19ade6063a78" width="80%"/><br>
+
 ```java
 @RestController
 @RequestMapping("first-service")
@@ -802,7 +821,7 @@ public class FirstServiceController {
    ...
 
     @GetMapping("/check")
-    public String check(HttpServletRequest request) {
+    public String check(HttpServletRequest request) { 
         
         log.info("Server port={}", request.getServerPort());
 
@@ -814,6 +833,10 @@ public class FirstServiceController {
     }
 }
 ```
+- `Environment env;` // yml 파일에 등록된 환경설정 정보를 가져옴
+- `HttpServletRequest request` : webflux 가 아닌 mvc 사용
+- 몇 번 포트에서 실행된 것인지 확인
+- 라운드 로빈 방식으로 
 
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c9735829-66d6-4673-b44a-7bfa1536cbc6" width="80%"/><br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/21f6bf14-c449-4493-9b6e-ed540167d590" width="70%"/><br>
