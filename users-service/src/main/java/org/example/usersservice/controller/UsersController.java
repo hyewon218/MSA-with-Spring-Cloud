@@ -1,5 +1,6 @@
 package org.example.usersservice.controller;
 
+import org.example.usersservice.vo.Greeting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,9 @@ public class UsersController {
     private Environment env;
 
     @Autowired
+    private Greeting greeting;
+
+    @Autowired
     public UsersController(Environment env) { // 생성자 주입
         this.env = env;
     }
@@ -24,6 +28,7 @@ public class UsersController {
 
     @GetMapping("/welcome")
     public String welcome() {
-        return env.getProperty("greeting.message");
+        //return env.getProperty("greeting.message");
+        return greeting.getMessage();
     }
 }
