@@ -1,25 +1,35 @@
 package org.example.usersservice.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.example.usersservice.dto.UsersCreateRequestDto;
+import org.example.usersservice.dto.UsersCreateResponseDto;
+import org.example.usersservice.service.UsersService;
 import org.example.usersservice.vo.Greeting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class UsersController {
 
-    private Environment env;
+    private final Environment env;
+    private final UsersService usersService;
 
     @Autowired
     private Greeting greeting;
 
-    @Autowired
+/*    @Autowired
     public UsersController(Environment env) { // 생성자 주입
         this.env = env;
-    }
+    }*/
 
     @GetMapping("/health_check")
     public String status() {
@@ -30,5 +40,10 @@ public class UsersController {
     public String welcome() {
         //return env.getProperty("greeting.message");
         return greeting.getMessage();
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<UsersCreateResponseDto> createUser(@RequestBody UsersCreateRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usersService.createUser(requestDto));
     }
 }
