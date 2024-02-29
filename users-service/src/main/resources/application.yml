@@ -16,7 +16,7 @@ spring:
     hibernate:
       ddl-auto: update
 
-  datasource:
+  datasource: #jpa 에서 자동으로 테이블 생성
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
     username: sa
