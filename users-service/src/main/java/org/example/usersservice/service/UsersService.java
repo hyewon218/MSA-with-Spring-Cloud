@@ -1,9 +1,14 @@
 package org.example.usersservice.service;
 
-import org.example.usersservice.dto.UsersCreateRequestDto;
-import org.example.usersservice.dto.UsersCreateResponseDto;
+import java.util.List;
+import org.example.usersservice.dto.UsersRequestDto;
+import org.example.usersservice.dto.UsersResponseDto;
 
 public interface UsersService {
 
-    UsersCreateResponseDto createUser(UsersCreateRequestDto requestDto);
+    UsersResponseDto createUser(UsersRequestDto requestDto);
+
+    List<UsersResponseDto> getAllUsers();
+
+    UsersResponseDto getUserByUserId(String userId);
 }

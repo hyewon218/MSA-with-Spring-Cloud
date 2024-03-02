@@ -1,6 +1,7 @@
 package org.example.usersservice.dto;
 
 import java.util.Date;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -12,4 +13,6 @@ public class UsersDto {
     private Date createdAt;
 
     private String encryptedPwd;
+
+    private List<OrdersResponseDto> orders;
 }

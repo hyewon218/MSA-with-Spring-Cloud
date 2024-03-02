@@ -14,7 +14,7 @@ import org.example.usersservice.entity.Users;
 @Setter
 @Builder
 @AllArgsConstructor
-public class UsersCreateRequestDto {
+public class UsersRequestDto {
 
     @Email(message = "This is not an email format")
     @NotBlank(message = "Email Cannot be null")
