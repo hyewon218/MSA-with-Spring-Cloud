@@ -25,6 +25,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((authz) -> authz
                     .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/users-service/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/users", "POST")).permitAll()
 //                  .requestMatchers("/**").access(this::hasIpAddress)
                     .requestMatchers("/**").access(
