@@ -200,3 +200,87 @@ public class UserController {
 
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/044467df-a08e-4365-a637-d32d9b637400" width="70%"/><br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/723413ee-fab7-4452-9c55-13a3a44c4ec6" width="70%"/><br>
+
+<br>
+
+## Catalogs Microservice
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a7d80e1b-b4e7-48b0-9e35-2731957b63f5" width="70%"/><br>
+
+라이브러리 추가
+- Spring Web
+- Devtools
+- Lombok
+- Jpa
+- Eureka Discovery Client
+- Model Mapper
+- h2
+
+### catalog-service
+#### application.yml
+```yaml
+server:
+  port: 0
+
+spring:
+  application:
+    name: catalog-service
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    generate-ddl: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+logging:
+  level:
+    org.example.catalogsservice:: DEBUG
+```
+- `jpa.hibernate.ddl-auto`: create-drop: 애플리케이션이 기동되면서 초기에 만들어야하는 데이터를 sql파일에 등록해두고 해당 데이터파일을 자동으로 insert해주는 작업을 해줄 수 있다.
+- `jpa.show-sql`: sql문 화면에 출력
+- `jpa.ddl-auto`: ddl문장 화면에 출력
+
+#### CatalogEntity
+```java
+@Data
+@Entity
+@Table(name = "catalog")
+public class CatalogEntity implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 120, unique = true)
+    private String productId;
+    @Column(nullable = false)
+    private String productName;
+    @Column(nullable = false)
+    private Integer stock;
+    @Column(nullable = false)
+    private Integer unitPrice;
+
+    @Column(nullable = false, updatable = false, insertable = false)
+    @ColumnDefault(value = "CURRENT_TIMESTAMP")
+    private Date createdAt;
+
+}
+```
+- @ColumnDefault(value = "CURRENT_TIMESTAMP"): H2 DB 에서 현재시간을 가져오기 위한 함수이름
+
