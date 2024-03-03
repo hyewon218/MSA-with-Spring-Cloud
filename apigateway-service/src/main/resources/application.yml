@@ -38,6 +38,11 @@ spring:
           predicates:
             - Path=/users-service/**
 
+        - id: catalogs-service
+          uri: lb://CATALOGS-SERVICE
+          predicates:
+            - Path=/catalogs-service/**
+
           filters:
             #- AddRequestHeader=second-request, second-request-header2
             #- AddResponseHeader=second-response, second-response-header2
