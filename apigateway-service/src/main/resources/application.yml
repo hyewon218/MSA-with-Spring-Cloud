@@ -33,10 +33,34 @@ spring:
           predicates:
             - Path=/second-service/**
 
+        #- id: users-service
+        #  uri: lb://USERS-SERVICE
+        #  predicates:
+        #    - Path=/users-service/**
+        - id: users-service
+          uri: lb://USERS-SERVICE
+          predicates:
+            - Path=/users-service/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
+        - id: users-service
+          uri: lb://USERS-SERVICE
+          predicates:
+            - Path=/users-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
         - id: users-service
           uri: lb://USERS-SERVICE
           predicates:
             - Path=/users-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
 
         - id: catalogs-service
           uri: lb://CATALOGS-SERVICE
