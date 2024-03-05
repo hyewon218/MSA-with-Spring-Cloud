@@ -35,8 +35,8 @@ public class UsersServiceImpl implements UsersService {
     @Override
     @Transactional
     public UsersResponseDto createUser(UsersRequestDto requestDto) {
-        String encryptedPassword = this.bcryptPasswordEncoder.encode(requestDto.getPassword());
-        return UsersResponseDto.of(usersRepository.save(requestDto.toEntity(encryptedPassword)));
+        requestDto.setPassword(this.bcryptPasswordEncoder.encode(requestDto.getPassword()));
+        return UsersResponseDto.of(usersRepository.save(requestDto.toEntity()));
     }
 
     @Override
@@ -52,6 +52,12 @@ public class UsersServiceImpl implements UsersService {
     @Transactional(readOnly = true)
     public UsersResponseDto getUserByUserId(String userId) {
         return UsersResponseDto.of(this.usersRepository.findByUserId(userId)
+            .orElseThrow(() -> new UsernameNotFoundException("User Not Found")));
+    }
+
+    @Override
+    public UsersResponseDto getUserDetailsByEmail(String email) {
+        return UsersResponseDto.of(this.usersRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User Not Found")));
     }
 }

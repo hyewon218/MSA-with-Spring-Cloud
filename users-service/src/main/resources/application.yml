@@ -34,3 +34,10 @@ eureka:
 greeting:
   message: Welcome to the Simple E-Commerce.
 
+logging:
+  level:
+    org.example.usersservice: DEBUG
+
+token:
+  expiration_time: 86400000 # 만료 기간 -> 하루
+  secret: secret-key # 토큰 키

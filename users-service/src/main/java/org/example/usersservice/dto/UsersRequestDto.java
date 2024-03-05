@@ -28,11 +28,11 @@ public class UsersRequestDto {
     @Size(min = 8, message = "Password Cannot ne less than two characters")
     private String password;
 
-    public Users toEntity(String encryptedPwd) {
+    public Users toEntity() {
         return Users.builder()
             .email(email)
             .name(name)
-            .encryptedPwd(encryptedPwd)
+            .encryptedPwd(password)
             .userId(UUID.randomUUID().toString())
             .build();
     }
