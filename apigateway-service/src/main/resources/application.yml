@@ -37,6 +37,8 @@ spring:
         #  uri: lb://USERS-SERVICE
         #  predicates:
         #    - Path=/users-service/**
+
+        # 유저 로그인
         - id: users-service
           uri: lb://USERS-SERVICE
           predicates:
@@ -45,6 +47,8 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/users-service/(?<segment>,*), /$\{segment}
+
+         # 유저 회원가입
         - id: users-service
           uri: lb://USERS-SERVICE
           predicates:
@@ -53,6 +57,8 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/users-service/(?<segment>,*), /$\{segment}
+
+        # 유저 일반기능
         - id: users-service
           uri: lb://USERS-SERVICE
           predicates:
@@ -61,6 +67,7 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/users-service/(?<segment>,*), /$\{segment}
+            - AuthorizationHeaderFilter # jwt 인증 관련 필터
 
         - id: catalogs-service
           uri: lb://CATALOGS-SERVICE
@@ -81,3 +88,6 @@ spring:
                 baseMessage: Hi, there.
                 preLogger: true
                 postLogger: true
+
+token:
+  secret: secret-key
