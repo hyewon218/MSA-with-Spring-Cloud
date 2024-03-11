@@ -1,0 +1,5 @@
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: ecommerce #git-local-repo 에 포함시켰던 파일명 (ecommerce.yml)

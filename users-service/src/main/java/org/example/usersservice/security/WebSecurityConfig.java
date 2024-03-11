@@ -56,6 +56,7 @@ public class WebSecurityConfig {
                     .requestMatchers(new AntPathRequestMatcher("/users-service/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/catalogs-service/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/users", "POST")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/health_check")).permitAll()
 //                  .requestMatchers("/**").access(this::hasIpAddress)
                     .requestMatchers("/**").access(
                         new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1')"))
@@ -77,9 +78,5 @@ public class WebSecurityConfig {
 
     private AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager) throws Exception {
         return new AuthenticationFilter(authenticationManager, usersService, env);
-    }
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

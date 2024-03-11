@@ -38,6 +38,13 @@ logging:
   level:
     org.example.usersservice: DEBUG
 
-token:
-  expiration_time: 86400000 # 만료 기간 -> 하루
-  secret: secret-key # 토큰 키
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,beans
+
+#Spring Cloud Service 에서 정보를 가져오도록 하기 위해 주석
+#token:
+#  expiration_time: 86400000 # 만료 기간 -> 하루
+#  secret: secret-key # 토큰 키

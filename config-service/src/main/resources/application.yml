@@ -8,5 +8,5 @@ spring:
     config:
       server:
         git:
-          uri: file:////Users/choihyewon/Desktop/Work/git-local-repo
+          uri: file:///Users/choihyewon/Desktop/Work/git-local-repo
 
