@@ -46,9 +46,8 @@ spring:
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
-
-         # 유저 회원가입
+            - RewritePath=/users-service/(?<segment>.*), /$\{segment}
+        # 유저 회원가입
         - id: users-service
           uri: lb://USERS-SERVICE
           predicates:
@@ -56,8 +55,16 @@ spring:
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
-
+            - RewritePath=/users-service/(?<segment>.*), /$\{segment}
+        # USER-SERVICE 의 Actuator 정보 추가
+        - id: users-service
+          uri: lb://USERS-SERVICE
+          predicates:
+            - Path=/users-service/actuator/**
+            - Method=GET,POST # POST - refresh
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/users-service/(?<segment>.*), /$\{segment}
         # 유저 일반기능
         - id: users-service
           uri: lb://USERS-SERVICE
@@ -66,7 +73,7 @@ spring:
             - Method=GET
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/users-service/(?<segment>,*), /$\{segment}
+            - RewritePath=/users-service/(?<segment>.*), /$\{segment}
             - AuthorizationHeaderFilter # jwt 인증 관련 필터
 
         - id: catalogs-service
@@ -91,3 +98,9 @@ spring:
 
 token:
   secret: secret-key
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace

@@ -14,7 +14,6 @@ import java.util.Base64;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.example.usersservice.dto.LoginRequestDto;
 import org.example.usersservice.dto.UsersResponseDto;
 import org.example.usersservice.service.UsersService;
@@ -23,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
