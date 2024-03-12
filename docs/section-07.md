@@ -308,5 +308,61 @@ spring:
       name: ecommerce
 
   profiles:
-    active: prod
+    active: dev
 ```
+- 둘의 secret key 가 다르면 오류
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/9b98142e-d8f6-4b1c-acec-7e02b7fc92bb" width="100%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/9cb3443a-644f-4451-a3c6-e53a8813ddfb" width="100%"/><br>
+
+<br>
+
+## Remote Git Repository
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5eaf1111-2773-47b2-a078-89d065e0e58d" width="100%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ce126f66-abf2-466e-9226-394a8f546bc9" width="80%"/><br>
+
+#### config-service - application.yml
+```yaml
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/hyewon218/spring-cloud-config.git
+```
+- private repo라면 username, password 명시
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d8f7bb14-ecb2-433d-8a3a-4e93e6b54b28" width="100%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/97141d51-b73d-480f-ab5b-d7d25a889213" width="100%"/><br>
+
+ecommerce.yml 수정 후 동기화<br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5aa3c33d-d8ca-47d0-af49-662d5e040adb" width="100%"/><br>
+
+<br>
+
+## Native File Repository
+깃을 사용하는 것이 아닌 Local 파일 시스템을 이용하는 방법
+
+#### bootstrap.yml
+```yaml
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///Users/choihyewon/Desktop/Work/git-local-repo
+        git:
+          uri: https://github.com/hyewon218/spring-cloud-config.git
+```
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d1b9425a-ec85-4df7-8d40-5a4d436c6769" width="100%"/><br>
