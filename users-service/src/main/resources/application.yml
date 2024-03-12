@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: users-service
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
 
   h2:
     console:
@@ -42,7 +47,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh,health,beans
+        include: refresh, health, beans, busrefresh
 
 #Spring Cloud Service 에서 정보를 가져오도록 하기 위해 주석
 #token:

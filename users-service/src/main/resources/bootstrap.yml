@@ -1,8 +1,11 @@
+## 해당 파일은 공용 파일로서, 애플리케이션이 어떤 이름이든 default 프로파일이면 조회된다.
+## http://localhost:8888/{config server 의 이름}/default 로 불러올 수 있음
 spring:
   cloud:
     config:
       uri: http://127.0.0.1:8888
-      name: ecommerce #git-local-repo 에 포함시켰던 파일명 (ecommerce.yml)
+      name: config-service # config-service 라는 애플리케이션 네임을 기입하면 application.yml 을 가져온다는 것이다.
+    # name: ecommerce #git-local-repo 에 포함시켰던 파일명 (ecommerce.yml)
 
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
