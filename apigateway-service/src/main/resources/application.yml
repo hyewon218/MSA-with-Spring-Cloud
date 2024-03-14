@@ -101,8 +101,9 @@ spring:
                 preLogger: true
                 postLogger: true
 
-token:
-  secret: secret-key
+# config-service application.yml 사용
+#token:
+#  secret: secret-key
 
 management:
   endpoints:
