@@ -4,7 +4,8 @@ spring:
   cloud:
     config:
       uri: http://127.0.0.1:8888
-      name: config-service # config-service 라는 애플리케이션 네임을 기입하면 application.yml 을 가져온다는 것이다.
+      name: users-service
+    # name: config-service # config-service 라는 애플리케이션 네임을 기입하면 application.yml 을 가져온다는 것이다.
     # name: ecommerce #git-local-repo 에 포함시켰던 파일명 (ecommerce.yml)
 
 #  profiles:
