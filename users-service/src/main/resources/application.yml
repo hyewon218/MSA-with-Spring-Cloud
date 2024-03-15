@@ -42,7 +42,7 @@ greeting:
 
 logging:
   level:
-    org.example.usersservice: DEBUG
+    org.example.usersservice.client: DEBUG
 
 management:
   endpoints:
