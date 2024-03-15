@@ -1,6 +1,7 @@
 package org.example.ordersservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 import org.example.ordersservice.entity.Orders;
@@ -13,6 +14,7 @@ public class OrdersResponseDto {
     private Integer qty;
     private Integer unitPrice;
     private Integer totalPrice;
+    private LocalDateTime createdAt;
 
     private String orderId;
 
@@ -22,6 +24,7 @@ public class OrdersResponseDto {
             .qty(orders.getQty())
             .unitPrice(orders.getUnitPrice())
             .totalPrice(orders.getTotalPrice())
+            .createdAt(orders.getCreatedAt())
             .orderId(orders.getOrderId())
             .build();
     }

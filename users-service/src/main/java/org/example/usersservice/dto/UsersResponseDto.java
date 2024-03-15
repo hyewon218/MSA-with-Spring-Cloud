@@ -26,4 +26,13 @@ public class UsersResponseDto {
             .userId(users.getUserId())
             .build();
     }
+
+    public static UsersResponseDto of(Users users, List<OrdersResponseDto> ordersResponseDtoList) {
+        return UsersResponseDto.builder()
+            .email(users.getEmail())
+            .name(users.getName())
+            .userId(users.getUserId())
+            .orders(ordersResponseDtoList)
+            .build();
+    }
 }

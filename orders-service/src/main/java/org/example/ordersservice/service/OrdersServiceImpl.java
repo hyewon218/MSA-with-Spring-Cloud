@@ -1,7 +1,6 @@
 package org.example.ordersservice.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.ordersservice.dto.OrdersRequestDto;
 import org.example.ordersservice.dto.OrdersResponseDto;
@@ -29,7 +28,7 @@ public class OrdersServiceImpl implements OrdersService {
         return this.ordersRepository.findByUserId(userId)
             .stream()
             .map(OrdersResponseDto::of)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /* orderId 에 해당하는 주문 정보 가져오기 */
