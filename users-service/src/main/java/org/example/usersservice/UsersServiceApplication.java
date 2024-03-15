@@ -3,11 +3,11 @@ package org.example.usersservice;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.client.RestTemplate;
 
+@EnableFeignClients
 @SpringBootApplication
 @EnableDiscoveryClient
 public class UsersServiceApplication {
@@ -21,9 +21,9 @@ public class UsersServiceApplication {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+/*    @Bean
     @LoadBalanced
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
-    }
+    }*/
 }
