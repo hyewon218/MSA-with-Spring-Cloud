@@ -1,12 +1,10 @@
 package org.example.usersservice.service;
 
-import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.usersservice.client.OrdersServiceClient;
-import org.example.usersservice.dto.OrdersResponseDto;
 import org.example.usersservice.dto.UsersRequestDto;
 import org.example.usersservice.dto.UsersResponseDto;
 import org.example.usersservice.entity.Users;
@@ -69,6 +67,7 @@ public class UsersServiceImpl implements UsersService {
 
 /*      // %s => userId, userId 가 주문한 모든 orders 내역 조회
         String orderUrl = String.format(environment.getProperty("orders_service.url"), userId);
+
         // Using as rest template
         ResponseEntity<List<OrdersResponseDto>> orderListResponseDto =
             restTemplate.exchange(orderUrl, HttpMethod.GET, null,
@@ -76,10 +75,11 @@ public class UsersServiceImpl implements UsersService {
                 });
         return UsersResponseDto.of(users, orderListResponseDto.getBody());*/
 
-        // Using a feign client
-        // return UsersResponseDto.of(users, ordersServiceClient.getOrders(userId));
+        // 1. Using a feign client
+        // 3. ErrorDecoder
+        return UsersResponseDto.of(users, ordersServiceClient.getOrders(userId));
 
-        // Feign Exception Handling
+/*      // 2. Feign Exception Handling
         List<OrdersResponseDto> orderList = null;
         try {
             orderList = ordersServiceClient.getOrders(userId);
@@ -87,7 +87,7 @@ public class UsersServiceImpl implements UsersService {
             log.error(ex.getMessage());
         }
 
-        return UsersResponseDto.of(users, orderList);
+        return UsersResponseDto.of(users, orderList);*/
     }
 
     @Override
