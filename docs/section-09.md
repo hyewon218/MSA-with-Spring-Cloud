@@ -12,7 +12,7 @@
   - 비대칭 암호화 방식에서 사용되는 각각의 키를 private key, public key라고 한다.
   - 암호화시에 private key를 사용하고 복호화시에 public key를 사용한다고 정의되지 않았고 다만 복호화시에 암호화에 사용되지 않은 키를 사용한다.
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4db90c87-e4a5-4de7-b91d-87ec08888e31" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c0338a48-9759-411a-91ed-8560efb6ae19" width="60%"/><br>
 
 일반적인 평문 데이터를 yml에서 보관하게되는데, 데이터베이스 암호, IP 주소와 같은 데이터는 암호화되어 저장해야 한다.<br>
 사용하는 시점에 암호화된 데이터를 복호화하여 사용하는 흐름
@@ -176,4 +176,4 @@ yml을 하나로 모아서 처리할 수도 있다.
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/0254ecd5-0e1b-4b13-86ba-d79a08d8fedc" width="80%"/><br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/9c010a0a-ec14-4e11-9926-9c85ad4f931c" width="80%"/><br>
 
-user-service.yml 와 ecommerce.yml 모두 application.yml이라는 상위 설정을 가지고 있으므로 토큰 정보와 같은 공통되는 설정은 application.yml에 기입한다.
+`users-service.yml` 와 `ecommerce.yml` 모두 `application.yml`이라는 상위 설정을 가지고 있으므로 토큰 정보와 같은 공통되는 설정은 `application.yml`에 기입한다.
