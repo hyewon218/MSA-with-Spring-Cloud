@@ -1,9 +1,10 @@
 package org.example.catalogsservice.repository;
 
+import java.util.Optional;
 import org.example.catalogsservice.entity.Catalogs;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CatalogsRepository extends JpaRepository<Catalogs, Long> {
 
-    Catalogs findByProductId(String productId);
+    Optional<Catalogs> findByProductId(String productId);
 }

@@ -9,13 +9,13 @@ import java.io.Serializable;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
 
 @Slf4j
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,4 +39,7 @@ public class Catalogs implements Serializable {
     @ColumnDefault(value = "CURRENT_TIMESTAMP")
     private Date createdAt;
 
+    public void minusStock(int amount) {
+        this.stock -= amount; // 원래 있던 재고 수량 - 전달된 주문 수량
+    }
 }

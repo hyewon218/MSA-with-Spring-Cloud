@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaConsumer {
 
-    CatalogsRepository repository;
+    private final CatalogsRepository repository;
 
     @KafkaListener(topics = "example-catalog-topic") // topic 에서 데이터 가져오기
     public void updateQty(String kafkaMessage) {
@@ -27,15 +27,19 @@ public class KafkaConsumer {
         Map<Object, Object> map = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
-            map = mapper.readValue(kafkaMessage, new TypeReference<Map<Object, Object>>() {});
+            // json string 데이터를 Java Map 으로 Deserialize
+            map = mapper.readValue(kafkaMessage, new TypeReference<>() {
+            });
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
         }
 
-        Catalogs entity = repository.findByProductId((String)map.get("productId"));
-        if (entity != null) {
-            entity.setStock(entity.getStock() - (Integer)map.get("qty")); // 원래 있던 재고 수량 - 전달된 주문 수량
-            repository.save(entity); // 재고 수량 업데이트
-        }
+        String productId = (String) map.get("productId");
+        Integer qty = (Integer) map.get("qty");
+
+        Catalogs catalogs = repository.findByProductId(productId)
+            .orElseThrow(() -> new RuntimeException("일치하는 카탈로그 정보가 존재하지 않습니다."));
+        catalogs.minusStock(qty);
+        repository.save(catalogs); // 재고 수량 업데이트
     }
 }
