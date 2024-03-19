@@ -6,7 +6,7 @@ import org.example.ordersservice.dto.OrdersResponseDto;
 
 
 public interface OrdersService {
-    OrdersResponseDto createOrder(String userId, OrdersRequestDto orderDetails);
+    OrdersResponseDto createOrder(OrdersRequestDto orderDetails);
     List<OrdersResponseDto> getOrdersByUserId(String userId);
     OrdersResponseDto getOrderByOrderId(String orderId);
 }

@@ -17,8 +17,8 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     @Transactional
-    public OrdersResponseDto createOrder(String userId, OrdersRequestDto requestDto) {
-        return OrdersResponseDto.of(ordersRepository.save(requestDto.toEntity(userId)));
+    public OrdersResponseDto createOrder(OrdersRequestDto requestDto) {
+        return OrdersResponseDto.of(ordersRepository.save(requestDto.toEntity()));
     }
 
     /* userId 에 해당하는 모든 주문 정보 가져오기 */

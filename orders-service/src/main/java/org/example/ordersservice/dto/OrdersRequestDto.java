@@ -1,6 +1,5 @@
 package org.example.ordersservice.dto;
 
-import java.util.UUID;
 import lombok.Data;
 import org.example.ordersservice.entity.Orders;
 
@@ -10,14 +9,18 @@ public class OrdersRequestDto {
     private String productId;
     private Integer qty;
     private Integer unitPrice;
+    private Integer totalPrice;
 
-    public Orders toEntity(String userId) {
+    private String orderId;
+    private String userId;
+
+    public Orders toEntity() {
         return Orders.builder()
             .productId(productId)
             .qty(qty)
             .unitPrice(unitPrice)
-            .orderId(UUID.randomUUID().toString())
-            .totalPrice(getQty()*getUnitPrice())
+            .totalPrice(totalPrice)
+            .orderId(orderId)
             .userId(userId)
             .build();
     }
