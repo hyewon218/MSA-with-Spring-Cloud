@@ -158,13 +158,21 @@
 ### MariaDB 설치
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/271e9e5f-6602-40f0-9e4a-b5eff6c20356" width="70%"/><br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5772d1d0-9de1-4757-8d5b-1424259dff5e" width="80%"/><br>
+- Enter password: **test1357**
+- use mydb;
+
 
 ## Orders Microservice에서 MariaDB 연동
 ### 라이브러리 추가
 - mariadb-java-client
 
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a8c9009c-d99e-4499-87db-c37be447e1a7" width="70%"/><br>
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/271e9e5f-6602-40f0-9e4a-b5eff6c20356" width="70%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5dbf4b70-ffb3-4d1d-919a-18a8a217d572" width="60%"/><br>
+- driver-class-name: org.mariadb.jdbc.Driver
+- url: jdbc:mariadb://localhost:3306/mydb
+- username: root
+- password: test1357
+
 
 ### 테이블 생성
 ```sql
@@ -176,6 +184,7 @@ create table users(
     created_at datetime default NOW()
 );
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/7eecbf69-7233-4d67-8d91-baf0db322e7b" width="30%"/><br>
 
 ```sql
 create table orders (
@@ -190,3 +199,168 @@ create table orders (
 );
 ```
 
+## Kafka Connect 설치 ①
+- curl -O http://packages.confluent.io/archive/6.1/confluent-community-6.1.0.tar.gz
+- tar xvf confluent-community-6.1.0.tar.gz
+- cd /Users/choihyewon/Desktop/Work/kafka_2.13-3.6.1
+
+### Kafka Connect 설정 (기본으로 사용)
+- /Users/choihyewon/Desktop/Work/kafka_2.13-3.6.1/config/connect-distributed.properties
+
+### Topic 목록 확인
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 -list
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/12adb8b6-7776-48e0-b93c-d3ae4e1ab0af" width="80%"/><br>
+
+
+### Kafka Connect 실행 (confluent-6.1.0)
+./bin/connect-distributed ./etc/kafka/connect-distributed.properties<br>
+
+- Topic 목록 확인<br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/0f9a3a98-e712-4ccc-a737-4502f7027b92" width="80%"/><br>
+- connect-configs, connect-offsets, connect-status 추가된 모습
+
+
+### JDBC Connector 설치
+- https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc
+- confluentinc-kafka-connect-jdbc-10.7.6.zip
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6e54283b-36f3-4640-90c1-6d6342322951" width="80%"/><br>
+
+카프카 커넥트를 통해서 데이터를 한쪽에서 읽어와서 다른쪽으로 전달하기 위해서는 사용하고자하는 타겟에 맞는 JDBC Connector가 필요하다.<br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/5e564bd2-87b5-4374-8e1e-a7c030446f46" width="80%"/><br>
+
+
+### etc/kafka/connect-distributed.properties 파일 마지막에 아래 plugin 정보 추가 (confluent-6.1.0)<br>
+- plugin.path=/Users/choihyewon/Desktop/Work/confluentinc-kafka-connect-jdbc-10.7.6/lib
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/1d6bf5c0-5e74-4e73-9f04-2840ebe41ef9" width="100%"/><br>
+
+카프카 커넥트의 설정파일인 connect-distributed.properties 에서 커넥터를 추가연동하기 위해서는 파일을 변경해야 한다.<br>
+
+### JdbcSourceConnector에서 MariaDB 사용하기 위해 mariadb 드라이버 복사 
+./share/java/kafka/ 폴더에 mariadb-java-client-2.7.2.jar 파일 복사
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/90b0690a-7ac4-4973-97a8-939e84edbb6f" width="80%"/><br>
+- ./share/java/kafka/ 폴더
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/90b0690a-7ac4-4973-97a8-939e84edbb6f" width="80%"/><br>
+- mariadb-java-client-2.7.2.jar 파일
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/02ac7324-822c-4581-919f-2fdbf4c39824" width="100%"/><br>
+- 복사
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/22b427c8-d8c9-47a1-90d0-0fe8c1b7fb35" width="50%"/><br>
+
+<br>
+
+## Kafka Source Connect 사용
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/8da3952a-4c29-429d-8a0c-1cac3744918f" width="80%"/><br>
+- 먼저 Kafka Connect 실행
+
+### Kafka Source Connect 추가 (MariaDB)
+
+```json
+{
+    "name" : "my-source-connect",
+    "config" : {
+        "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "connection.url":"jdbc:mysql://localhost:3306/mydb",
+        "connection.user":"root",
+        "connection.password":"test1357",
+        "mode": "incrementing",
+        "incrementing.column.name" : "id",
+        "table.whitelist":"users",
+        "topic.prefix" : "my_topic_",
+        "tasks.max" : "1"
+    }
+}
+```
+curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
+- name: 커넥트이름
+- mode: incrementing - 데이터가 등록되면서 데이터를 자동으로 증가시키는 모드
+- incrementing.column.name: 자동으로 증가될 컬럼
+- table.whitelist: 데이터베이스에 특정한 값을 저장하면 데이터베이스를 체크하고있다가 변경사항이 생기면 가져와서 토픽에 저장한다. 해당 작업 시에 whitelist의 테이블을 체크하는 것
+- topic.prefix: 감지 내용을 저장할 위치 -> my_topic_users
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/2e0bfdab-a443-479f-8d52-6f494315ef9d" width="80%"/><br>
+
+#### kafka Connect 목록 확인
+curl http://localhost:8083/connectors | jq
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/582f2931-7c3c-4873-bcb1-2924be7422ab" width="80%"/><br>
+#### kafka Connect 확인
+curl http://localhost:8083/connectors/my-source-connect/status | jq
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/0ab1e689-0099-400e-8fb9-6fe329389adc" width="80%"/><br>
+
+
+### mydb 변동사항 생성 - insert
+```sql
+insert into users(user_id, pwd, name) values('user1', 'test1111', 'User name');
+```
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c00987da-2e8e-4a82-aa82-e4229e103a4d" width="80%"/><br>
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/002ebecd-d23d-4ea0-b413-0130511c24a9" width="60%"/><br>
+- 토픽이 생성된 모습 (my_topic_users)<br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6c10b1c0-b1a5-4179-bdaa-2933e188f1b6" width="100%"/><br>
+- Consumer를 통해 topic에 들어온 json정보를 확인할 수 있다.
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/0385bacf-5405-4d50-8da6-6e4aa052ae54" width="100%"/><br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/11dfbbc7-542d-4b64-be4e-2971cc1b0ad0" width="80%"/><br>
+- topic 을 이용해 database 에 자료를 저장하고 싶다면 이런 형식으로 전달을 해야 한다.
+- schema : 데이터 구조
+
+<br>
+
+## Kafka Sink Connect 사용
+Kafka Connect에 아래 내용 전달
+```json
+{
+  "name":"my-sink-connect",
+  "config":{
+    "connector.class":"io.confluent.connect.jdbc.JdbcSinkConnector",
+    "connection.url":"jdbc:mysql://localhost:3306/mydb",
+    "connection.user":"root",
+    "connection.password":"test1357",
+    "auto.create":"true",
+    "auto.evolve":"true",
+    "delete.enabled":"false",
+    "tasks.max":"1",
+    "topics":"my_topic_users"
+  }
+}
+```
+curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
+
+- 싱크 커넥트는 토픽에서 데이터를 가져와서 사용하는 **사용처**
+- topics의 value가 사용처가 된다. 따라서 현재 설정은 mydb에 `my_topic_users`라는 테이블이 생성된다.
+- `auto.create`: **토픽과 같은 이름의 테이블을 생성**해주겠다는 옵션
+- 스키마는 토픽에 저장된 메시지를 바탕으로 결정된다.
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/313fe3cb-8e90-4438-b932-c5d436e28aaa" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d4b88f74-51be-4938-bf27-0579f60256f4" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/597acf10-1fa2-44f2-b3a4-7aee7887cf41" width="30%"/><br>
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/710ba514-f2c3-4d53-bff3-7738111f823a" width="80%"/><br>
+- 데이터를 insert하면? 새로운 테이블이 생성됨을 확인할 수 있다.
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/04d290ba-1d37-4a9a-a942-b3d0a63b392f" width="80%"/><br>
+- 데이터를 insert 하면 `users` 테이블 + `my_topic_users` 까지 데이터가 저장된다. -> source connect 를 통해 전달된 데이터가 sink connect 에 의해 연결된 테이블에 저장된다.
+
+<br>
+
+### kafka producer를 이용해서 Kafka Topic에 데이터 직접 전송
+- kafka-console-producer에서 데이터 전송 -> Topic에 추가 -> MariaDB에 추가<br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a826e316-c67d-487c-ab20-9655cface40f" width="80%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ae4bdb6c-1720-4311-b31d-59a581e35416" width="80%"/><br>
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/9f91350a-6493-4220-9e64-11f22da78575" width="80%"/><br>
+- users 테이블 : 자신이 가진 데이터를 topic 에 넣는 
+- my_topic_users 테이블 : sink connect 와 연결되어 있는 
