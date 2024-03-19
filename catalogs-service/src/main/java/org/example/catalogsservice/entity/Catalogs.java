@@ -9,13 +9,13 @@ import java.io.Serializable;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
 
 @Slf4j
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
