@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: users-service
+
   rabbitmq:
     host: 127.0.0.1
     port: 5672
@@ -45,6 +46,15 @@ logging:
     org.example.usersservice.client: DEBUG
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: B3
+      produce: B3_MULTI
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
   endpoints:
     web:
       exposure:
