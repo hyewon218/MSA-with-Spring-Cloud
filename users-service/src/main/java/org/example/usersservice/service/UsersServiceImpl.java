@@ -5,10 +5,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.usersservice.client.OrdersServiceClient;
+import org.example.usersservice.dto.OrdersResponseDto;
 import org.example.usersservice.dto.UsersRequestDto;
 import org.example.usersservice.dto.UsersResponseDto;
 import org.example.usersservice.entity.Users;
 import org.example.usersservice.repository.UsersRepository;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +31,8 @@ public class UsersServiceImpl implements UsersService {
     //private final Environment environment;
 
     private final OrdersServiceClient ordersServiceClient;
+
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
 
     /*
@@ -77,7 +82,7 @@ public class UsersServiceImpl implements UsersService {
 
         // 1. Using a feign client
         // 3. ErrorDecoder
-        return UsersResponseDto.of(users, ordersServiceClient.getOrders(userId));
+        /*return UsersResponseDto.of(users, ordersServiceClient.getOrders(userId));*/
 
 /*      // 2. Feign Exception Handling
         List<OrdersResponseDto> orderList = null;
@@ -88,6 +93,14 @@ public class UsersServiceImpl implements UsersService {
         }
 
         return UsersResponseDto.of(users, orderList);*/
+
+        // 4. CircuitBreaker
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<OrdersResponseDto> orderList = circuitbreaker.run(() -> ordersServiceClient.getOrders(userId),
+                                                    throwable -> new ArrayList<>()
+        );
+
+        return UsersResponseDto.of(users, orderList);
     }
 
     @Override
