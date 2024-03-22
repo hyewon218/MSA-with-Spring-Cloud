@@ -140,6 +140,19 @@
       <artifactId>zipkin-reporter-brave</artifactId>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
+    <!-- user service, order service trace ID 같게 -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+
   </dependencies>
   <dependencyManagement>
     <dependencies>

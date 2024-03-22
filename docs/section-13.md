@@ -165,7 +165,283 @@ Order Service 기동 - 주문 1개 생성 후 user 정보 get<br>
 Order Service 중지<br>
 <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/197b12bc-acd8-4013-a7be-54f6c248f159" width="70%"/><br>
 
+<br>
+
+## 분산 추적의 개요 Zipkin 서버 설치
+마이크로서비스가 독립적으로 자체적인 서비스가 작동하는 것이 아닌 연쇄적으로 여러개의 서비스가 실행되는 과정에서<br>
+해당하는 요청 정보가 어떻게 실행되고 어느단계를 거쳐서 어느 마이크로서비스로 이동되는지 추적할 수 있는 Zipkin에 대해서 알아본다.
+
+### Zipkin
+- https://zipkin.io/
+- Twitter에서 사용하는 분산 환경의 Timing 데이터 수집, 추적 시스템 (오픈소스)
+- Google Drapper에서 발전하였으며, 분산환경에서의 시스템 병목 현상 파악
+- Collector, Query Service, Database WebUI로 구성
+- Span
+  - 하나의 요청에 사용되는 작업의 단위
+  - 64 bit unique ID
+- Trace
+  - 트리 구조로 이뤄진 span 셋
+  - 하나의 요청에 대한 같은 Trace ID 발급<br>
+  
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c63d3281-3715-482c-bb22-f9cd8c66813e" width="50%"/><br>
+- 모든 Microservice는 Zipkin에 데이터를 전달한다.
 
 
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/8f33d42e-2f0f-4194-ac8a-26bbd9f4c891" width="50%"/><br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4230fd7e-8fb2-428d-a6c3-6cc830ed76ab" width="50%"/><br>
+
+
+### Spring Cloud Sleuth
+Zipkin과 연동하여 로그파일 데이터, 스트리밍 데이터값을 Zipkin에 전달시켜주는 역할
+
+- 스프링 부트 애플리케이션을 Zipkin과 연동
+- 요청 값에 따른 Trace ID, Span ID 부여
+- Trace와 Span Ids를 로그에 추가 가능
+  - servlet filter
+  - rest template
+  - scheduled actions
+  - message channels
+  - feign client
+
+### Spring Cloud Sleuth + Zipkin
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/aa366e9a-86ca-4096-9918-30f61d5ec2c0" width="70%"/><br>
+사용자의 요청이 시작되고 끝날 때까지 같은 Trace ID가 사용되고 그 사이에서 마이크로서비스 간의 Transaction 이 발생한다면 세부적인 Transaction을 위해 Span ID가 발급된다.
+
+## Spring Cloud Sleuth + Zipkin을 이용한 Microservice의 분산
+**Users Microservice 수정**
+
+라이브러리 추가
+- spring-cloud-starter-sleuth
+- spring-cloud-starter-zipkin
+
+#### application.yml
+zipkin 서버 위치 지정
+```yaml
+spring:
+  application:
+    name: user-service
+  zipkin:
+    base-url: http://localhost:9411 # zipkin server 위치
+    enabled: true # 작동 가능하도록
+  sleuth:
+    sampler: 
+      probability: 1.0 # 발생된 로그를 어느정도의 빈도수를 가지고 zipkin에 전달할지 -> 현재 1.0은 전부 전달 == 100퍼센트
+...
+```
+#### UserServiceImpl
+```java
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    ...
+    @Override
+    public UserDto getUserByUserId(String userId) {
+        ...
+
+        /* ErrorDecoder */
+//        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+        log.info("Before call orders microservice");
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<ResponseOrder> orderList = circuitbreaker.run(() ->
+                        orderServiceClient.getOrders(userId),
+                throwable -> new ArrayList<>()
+        );
+        log.info("After called orders microservice");
+
+        userDto.setOrders(orderList);
+
+        return userDto;
+    }
+...
+}
+```
+
+**Orders Microservice 수정**
+라이브러리 추가
+- spring-cloud-starter-sleuth
+- spring-cloud-starter-zipkin
+
+```yaml
+spring:
+  application:
+    name: order-service
+  zipkin:
+    base-url: http://127.0.0.1:9411
+    enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0
+```
+#### OrderController
+```java
+@RestController
+@RequestMapping("/order-service")
+@Slf4j
+@RequiredArgsConstructor
+public class OrderController {
+
+    ...
+
+    @PostMapping("/{userId}/orders")
+    public ResponseEntity<ResponseOrder> createOrder(@PathVariable("userId") String userId,
+                                                     @RequestBody RequestOrder orderDetails) {
+        log.info("Before add orders data");
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        OrderDto orderDto = mapper.map(orderDetails, OrderDto.class);
+        orderDto.setUserId(userId);
+        /* jpa */
+        OrderDto createdOrder = orderService.createOrder(orderDto);
+        ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
+
+        /* Send an order to the Kafka */
+//        kafkaProducer.send("example-order-topic", orderDto);
+
+        /* kafka */
+//        orderDto.setOrderId(UUID.randomUUID().toString());
+//        orderDto.setTotalPrice(orderDetails.getQty() * orderDetails.getUnitPrice());
+//        ResponseOrder responseOrder = mapper.map(orderDto, ResponseOrder.class);
+
+//        kafkaProducer.send("example-catalog-topic", orderDto); // order와 catalog를 연동하기 위한 kafka producer
+//        orderProducer.send("order", orderDto); // 사용자의 주문 정보를 kafka topic에 전달시키는 용도
+
+        log.info("After added orders data");
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseOrder);
+    }
+
+    @GetMapping("/{userId}/orders")
+    public ResponseEntity<List<ResponseOrder>> getOrder(@PathVariable("userId") String userId) throws Exception {
+        log.info("Before retrieve orders data");
+
+        List<OrderEntity> orderList = orderService.getOrdersByUserId(userId);
+
+        List<ResponseOrder> result = new ArrayList<>();
+        ModelMapper mapper = new ModelMapper();
+        orderList.forEach(v ->
+                result.add(mapper.map(v, ResponseOrder.class))
+        );
+        log.info("After retrieved orders data");
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+}
+```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/6319ad83-b69f-4717-8264-ef45ef6fe32e" width="70%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ee0d8671-6359-4925-91bf-9ce9978cf04f" width="70%"/><br>
+
+<br>
+
+#### order create
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ffd1b36e-129a-4d48-a7b4-07a28c1731c9" width="100%"/><br>
+- [order-service,bf3e9de37aa6d463,bf3e9de37aa6d463]: [서비스명, trace ID, span ID]
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/f32c2a40-277d-44d0-98b4-80f56fb67d2d" width="100%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/2dbf5e95-5177-46db-8aec-994e7b1a9a40" width="100%"/><br>
+
+<br>
+
+
+#### User 정보 Get - User Service
+```
+2024-03-22T14:00:47.228+09:00  INFO 47290 --- [users-service] [o-auto-1-exec-3] [65fd107febbe8d29a8cbe0c39eceaece-8f4b11d97f20e1ff] o.e.u.service.UsersServiceImpl           : Before call orders microservice
+2024-03-22T14:00:47.241+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] ---> GET http://ORDERS-SERVICE/orders-service/2f6ac900-510d-4207-88e5-032f31509589/orders HTTP/1.1
+2024-03-22T14:00:47.242+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] ---> END HTTP (0-byte body)
+2024-03-22T14:00:47.392+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] <--- HTTP/1.1 200 (150ms)
+2024-03-22T14:00:47.392+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] connection: keep-alive
+2024-03-22T14:00:47.392+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] content-type: application/json
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] date: Fri, 22 Mar 2024 05:00:47 GMT
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] keep-alive: timeout=60
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] transfer-encoding: chunked
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] 
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] [{"productId":"CATALOG-0001","qty":10,"unitPrice":1500,"totalPrice":15000,"createdAt":"2024-03-22T14:00:09.159131","orderId":"d881a359-2ab6-4684-a8a0-10972da1d7b1"}]
+2024-03-22T14:00:47.393+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-1] [65fd107febbe8d29a8cbe0c39eceaece-9c0d9eb3537fb658] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] <--- END HTTP (165-byte body)
+2024-03-22T14:00:47.399+09:00  INFO 47290 --- [users-service] [o-auto-1-exec-3] [65fd107febbe8d29a8cbe0c39eceaece-8f4b11d97f20e1ff] o.e.u.service.UsersServiceImpl           : After called orders microservice
+```
+
+#### User 정보 Get - Order Service
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/25360000-c4cd-42ac-bb83-9e6773aa99e8"/><br>
+- feign 클라이언트에서 order service를 호출하면서 생성한 trace ID와 order service에서 확인할 수 있는 trace ID가 동일하다. -> 같은 요청임을 확인<br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/f0717aeb-fcb0-43bc-a8ed-e7b97fad4ce5" width="100%"/><br>
+
+Zipkin Dependency 확인<br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ee3b4c04-6c00-49c5-84ab-17fc1568daf5" width="50%"/><br>
+
+<br>
+
+#### 강제 오류 발생 - OrderController
+```java
+@RestController
+@RequestMapping("/order-service")
+@Slf4j
+@RequiredArgsConstructor
+public class OrderController {
+
+    ...
+
+    @GetMapping("/{userId}/orders")
+    public ResponseEntity<List<ResponseOrder>> getOrder(@PathVariable("userId") String userId) throws Exception {
+        log.info("Before retrieve orders data");
+
+        List<OrderEntity> orderList = orderService.getOrdersByUserId(userId);
+
+        List<ResponseOrder> result = new ArrayList<>();
+        ModelMapper mapper = new ModelMapper();
+        orderList.forEach(v ->
+                result.add(mapper.map(v, ResponseOrder.class))
+        );
+
+        try {
+            Thread.sleep(1000);
+            throw new Exception("장애 발생");
+        }catch (InterruptedException e) {
+            log.warn(e.getMessage());
+        }
+
+        log.info("After retrieved orders data");
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+}
+```
+
+1건 주문 후 확인
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bac9b8a4-ee79-4414-9bcf-a515524f4e61" width="70%"/><br>
+
+- 주문이 되었지만 예외를 발생시켰기 때문에 주문이 확인되지 않는다.
+
+```
+2024-03-22T14:52:09.431+09:00  INFO 47290 --- [users-service] [o-auto-1-exec-1] [65fd1c89c53e5dbcfdafb97bb8b5c425-8cc967b342ef6b01] o.e.u.service.UsersServiceImpl           : Before call orders microservice
+2024-03-22T14:52:09.432+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] ---> GET http://ORDERS-SERVICE/orders-service/2f6ac900-510d-4207-88e5-032f31509589/orders HTTP/1.1
+2024-03-22T14:52:09.432+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] ---> END HTTP (0-byte body)
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] <--- HTTP/1.1 500 (1215ms)
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] connection: close
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] content-type: application/json
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] date: Fri, 22 Mar 2024 05:52:10 GMT
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] transfer-encoding: chunked
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] 
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] {"timestamp":"2024-03-22T05:52:10.632+00:00","status":500,"error":"Internal Server Error","trace":"java.lang.Exception: 장애 발생\n\tat org.example.ordersservice.controller.OrdersController.getOrdersByUserId(OrdersController.java:76)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:259)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:192)\n\tat org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:920)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:830)\n\tat org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)\n\tat org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)\n\tat org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)\n\tat org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)\n\tat org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)\n\tat jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)\n\tat org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)\n\tat jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)\n\tat org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)\n\tat org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)\n\tat org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)\n\tat org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)\n\tat org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)\n\tat org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)\n\tat org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)\n\tat org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)\n\tat org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)\n\tat org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)\n\tat org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)\n\tat org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)\n\tat org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)\n\tat org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)\n\tat org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n","message":"장애 발생","path":"/orders-service/2f6ac900-510d-4207-88e5-032f31509589/orders"}
+2024-03-22T14:52:10.648+09:00 DEBUG 47290 --- [users-service] [pool-5-thread-5] [65fd1c89c53e5dbcfdafb97bb8b5c425-b71981281cf2d001] o.e.u.client.OrdersServiceClient         : [OrdersServiceClient#getOrders] <--- END HTTP (5389-byte body)
+2024-03-22T14:52:10.663+09:00  INFO 47290 --- [users-service] [o-auto-1-exec-1] [65fd1c89c53e5dbcfdafb97bb8b5c425-8cc967b342ef6b01] o.e.u.service.UsersServiceImpl           : After called orders microservice
+```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/60365d35-47f9-42ec-8415-96692469cae1" width="100%"/><br>
+
+Zipkin 확인<br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/fd3e9a03-2a33-49c7-9ca0-3b57f6eee037" width="100%"/><br>
+
+Zipkin Dependency 확인<br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ca3eb904-e2dc-4941-bc7a-326754b34231" width="50%"/><br>
+- Error가 추가되었다.
+
+> 각각의 마이크로서비스가 현재 가지고있는 메모리 상태, 호출된 정확한 횟수, ... 파악하기 위해서는 추가적으로 모니터링 기능을 넣으면 된다.
 
 

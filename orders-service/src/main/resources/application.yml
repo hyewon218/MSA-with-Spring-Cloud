@@ -37,6 +37,8 @@ eureka:
 logging:
   level:
     org.example.ordersservice: DEBUG
+#  pattern:
+#    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 management:
   tracing:
@@ -48,3 +50,7 @@ management:
   zipkin:
     tracing:
       endpoint: "http://localhost:9411/api/v2/spans"
+  endpoints:
+    web:
+      exposure:
+        include: health, httptrace, info, metrics, prometheus

@@ -44,6 +44,8 @@ greeting:
 logging:
   level:
     org.example.usersservice.client: DEBUG
+#  pattern:
+#    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 management:
   tracing:
@@ -58,7 +60,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans, busrefresh
+        include: refresh, health, beans, busrefresh, info, metrics, prometheus
 
 #Spring Cloud Service 에서 정보를 가져오도록 하기 위해 주석
 #token:

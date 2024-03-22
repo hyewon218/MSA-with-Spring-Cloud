@@ -1,5 +1,6 @@
 package org.example.usersservice.controller;
 
+import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.usersservice.dto.UsersRequestDto;
@@ -34,6 +35,7 @@ public class UsersController {
     }*/
 
     @GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
     public String status() { // ecommerce.yml 정보 가져옴
         return String.format("It's Working in User Service"
             + ", port(local.server.port)=" + env.getProperty("local.server.port")
@@ -43,6 +45,7 @@ public class UsersController {
     }
 
     @GetMapping("/welcome")
+    @Timed(value="users.welcome", longTask = true)
     public String welcome() {
         //return env.getProperty("greeting.message");
         return greeting.getMessage();

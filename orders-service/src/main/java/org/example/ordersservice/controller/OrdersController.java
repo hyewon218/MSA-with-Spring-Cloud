@@ -43,6 +43,8 @@ public class OrdersController {
     @PostMapping("/{userId}/orders")
     public ResponseEntity<OrdersResponseDto> createOrders(@PathVariable("userId") String userId,
                                                           @RequestBody @Validated OrdersRequestDto ordersRequestDto) {
+        // section-13 test
+        log.info("Before add orders data");
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -57,13 +59,27 @@ public class OrdersController {
 
         OrdersResponseDto ordersResponseDto = mapper.map(ordersRequestDto, OrdersResponseDto.class);*/
 
+        OrdersResponseDto responseDto = ordersService.createOrder(ordersRequestDto);
+
         log.info("After added orders data");
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.ordersService.createOrder(ordersRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     /** 유저가 주문한 모든 주문 조회 **/
     @GetMapping("/{userId}/orders")
-    public ResponseEntity<List<OrdersResponseDto>> getOrdersByUserId(@PathVariable(name = "userId") String userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.ordersService.getOrdersByUserId(userId));
+    public ResponseEntity<List<OrdersResponseDto>> getOrdersByUserId(@PathVariable(name = "userId") String userId) throws Exception {
+        log.info("Before retrieve orders data");
+        List<OrdersResponseDto> responseDtoList = this.ordersService.getOrdersByUserId(userId);
+
+        // section-13 test
+        try {
+            Thread.sleep(1000);
+            throw new Exception("장애 발생");
+        }catch (InterruptedException e) {
+            log.warn(e.getMessage());
+        }
+
+        log.info("Add retrieved orders data");
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
     }
 }
