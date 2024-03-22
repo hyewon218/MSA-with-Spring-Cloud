@@ -25,18 +25,7 @@ spring:
             preLogger: true
             postLogger: true
       routes:
-        - id: first-service
-          uri: lb://MY-FIRST-SERVICE
-          predicates:
-            - Path=/first-service/**
-          filters:
-            #- AddRequestHeader=first-request, first-request-header2
-            #- AddResponseHeader=first-response, first-response-header2
-            - CustomFilter
-        - id: second-service
-          uri: lb://MY-SECOND-SERVICE
-          predicates:
-            - Path=/second-service/**
+
 
         #- id: users-service
         #  uri: lb://USERS-SERVICE
@@ -90,7 +79,28 @@ spring:
           uri: lb://ORDERS-SERVICE
           predicates:
             - Path=/orders-service/**
+        # ORDER-SERVICE 의 Actuator 정보 추가
+        - id: order-service
+          uri: lb://ORDERS-SERVICE
+          predicates:
+            - Path=/orders-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/orders-service/(?<segment>.*), /$\{segment}
 
+        - id: first-service
+          uri: lb://MY-FIRST-SERVICE
+          predicates:
+            - Path=/first-service/**
+          filters:
+            #- AddRequestHeader=first-request, first-request-header2
+            #- AddResponseHeader=first-response, first-response-header2
+            - CustomFilter
+        - id: second-service
+          uri: lb://MY-SECOND-SERVICE
+          predicates:
+            - Path=/second-service/**
           filters:
             #- AddRequestHeader=second-request, second-request-header2
             #- AddResponseHeader=second-response, second-response-header2
