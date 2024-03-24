@@ -18,4 +18,5 @@
 13. [Section 12: 데이터 동기화를 위한 Apache Kafka 활용 - 2](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-12.md)
 14. [Section 13: 장애 처리와 Microservice 분산 추적](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-13.md)
 15. [Section 14: Microservice 모니터링](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-14.md)
-16. [Section 15: 애플리케이션 배포 - Docker Container](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-15.md)
+16. [Section 15: 애플리케이션 배포를 위한 컨테이너 가상화](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-15.md)
+17. [Section 16: 애플리케이션 배포 - Docker Container](https://github.com/hyewon218/MSA-with-Spring-Cloud/blob/master/docs/section-16.md)
