@@ -87,17 +87,34 @@ $ docker exec -it mysql bash
 
 ## Docker 이미지 생성과 Public registry에 Push
 ### Dockerfile for Users Microservice
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/507eae18-c44b-4e40-a8f8-11209a759c18" width="50%"/><br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bdfd9133-fd20-45a2-84c2-fed7721da359" width="70%"/><br>
+
+### Users Microservice
+```shell
+mvn clean complie package -DskipTest=true
+````
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ad3c69b5-e93d-4076-b8b3-473520197a67" width="20%"/>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4dea5606-6f25-49c5-a70a-ead15a229c6f" width="30%"/><br>
+
+
+
+<br>
 
 ```shell
 $ docker build -t won1110218/users-service:1.0 .
 ```
 - . : 현재 디렉토리에 있는 도커파일을 가지고 이미지를 만든다
 ```shell
-$ docker push won1110218/user-service:1.0
+$ docker push won1110218/users-service:1.0
 ```
-- 도커허브에 올리기
+- 도커허브에 올리기<br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a2117c81-45bd-4387-aa33-ade9b6987210" width="70%"/><br>
+
+
 ```shell
-$ docker pull won1110218/user-service:1.0
+$ docker pull won1110218/users-service:1.0
 ```
-- 도커허브에서 다운로드 받아오기
+- 도커허브에서 다운로드 받아오기<br>
+  <img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/e3d56dad-44ed-4f03-8f8a-e7ac7e8fef5c" width="50%"/><br>

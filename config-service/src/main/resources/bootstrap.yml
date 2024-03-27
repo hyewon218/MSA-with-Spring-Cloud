@@ -1,6 +1,7 @@
 encrypt:
 #  key: abcdefghijklmnopqrstuvwxyz0123456789
   key-store: # 비대칭키 암호화
-    location: file:///Users/choihyewon/Desktop/Work/keystore/apiEncryptionKey.jks
+#    location: file:///Users/choihyewon/Desktop/Work/keystore/apiEncryptionKey.jks
+    location: file:/apiEncryptionKey.jks
     password: won1234
     alias: apiEncryptionKey
