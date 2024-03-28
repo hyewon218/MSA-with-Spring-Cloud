@@ -54,10 +54,10 @@ public class OrdersController {
         ordersRequestDto.setTotalPrice(ordersRequestDto.getQty() * ordersRequestDto.getUnitPrice());
 
         /* send this order to the kafka */
-/*        kafkaProducer.send("example-catalog-topic", ordersRequestDto); // order와 catalog를 연동하기 위한 kafka producer
-        orderProducer.send("orders", ordersRequestDto); // 사용자의 주문 정보를 kafka topic에 전달시키는 용도
+        kafkaProducer.send("example-catalog-topic", ordersRequestDto); // order와 catalog를 연동하기 위한 kafka producer
+        //orderProducer.send("orders", ordersRequestDto); // 사용자의 주문 정보를 kafka topic에 전달시키는 용도
 
-        OrdersResponseDto ordersResponseDto = mapper.map(ordersRequestDto, OrdersResponseDto.class);*/
+        //OrdersResponseDto ordersResponseDto = mapper.map(ordersRequestDto, OrdersResponseDto.class);
 
         OrdersResponseDto responseDto = ordersService.createOrder(ordersRequestDto);
 
