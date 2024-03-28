@@ -72,12 +72,12 @@ public class OrdersController {
         List<OrdersResponseDto> responseDtoList = this.ordersService.getOrdersByUserId(userId);
 
         // section-13 test
-        try {
+/*        try {
             Thread.sleep(1000);
             throw new Exception("장애 발생");
         }catch (InterruptedException e) {
             log.warn(e.getMessage());
-        }
+        }*/
 
         log.info("Add retrieved orders data");
         return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
