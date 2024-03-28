@@ -166,18 +166,18 @@ docker run -d -p 8761:8761 --network ecommerce-network \
 ```shell
 FROM openjdk:17-ea-11-jdk-slim
 VOLUME /tmp
-COPY target/apigateway-service-1.0.jar ApiGatewayService.jar
-ENTRYPOINT ["java", "-jar", "ApiGatewayService.jar"]
+COPY target/apigateway-service-1.0.jar apigateway-service.jar
+ENTRYPOINT ["java", "-jar", "apigateway-service.jar"]
 ```
 
 #### Docker Image 생성
 ```shell
-docker build --tag yoon11/apigateway-service:1.0 .
+docker build --tag won1110218/apigateway-service:1.0 .
 ```
 
 #### docker hub에 push
 ```shell
-docker push yoon11/apigateway-service:1.0
+docker push won1110218/apigateway-service:1.0
 ```
 
 #### apigateway service 실행
@@ -187,14 +187,16 @@ docker run -d -p 8000:8000 --network ecommerce-network \
  -e "spring.rabbitmq.host=rabbitmq" \
  -e "eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/" \
  --name apigateway-service \
- yoon11/apigateway-service:1.0
+ won1110218/apigateway-service:1.0
 ```
 - 3가지 설정 정보(spring.cloud.config.uri, spring.rabbitmq.host, eureka.client.serviceUrl.defaultZone) 변경하여 실행
 
 #### 결과
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bd100fd2-354a-439a-8020-dc95dac033bf" width="60%"/><br>
 - ecommerce-network에 등록된 모습
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/99b4c300-c471-4996-80a9-c90791afc875" width="60%"/><br>
 
 
 <br>
@@ -205,28 +207,44 @@ docker run -d -p 8000:8000 --network ecommerce-network \
 FROM mariadb
 ENV MYSQL_ROOT_PASSWORD 1234
 ENV MYSQL_DATABASE mydb
-COPY ./mysql_data/data /var/lib/mysql
+COPY ./mysql_data/mysql /var/lib/mysql
 EXPOSE 3306
-ENTRYPOINT ["mysqld"]
+CMD ["--user=root"]
+#ENTRYPOINT ["mysqld"]
 ```
-
 - 데이터베이스를 만들때 테이블에 대한 정보가 있다면 script로 만들 수도 있고, 로컬에서 mariadb를 기동하면서 만들어둔 테이블을 컨테이너 안으로 복사할 수도 있다.
-- 기존에 로컬에서 만든 db정보를 copy
+- 기존에 로컬에서 만든 db정보를 컨테이너 내부(/var/lib/mysql)에 copy
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bd766fea-9105-4b40-bbdc-0e830bef58eb" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/87461d47-c750-406f-9dd2-07b07ab6933e" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/fc2cd79a-e0e2-490a-a31e-0d7987f12342" width="30%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/e3c2199b-5bf4-438a-bd8e-6c28e8885135" width="30%"/><br>
+
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/99b4c300-c471-4996-80a9-c90791afc875" width="60%"/><br>
+
+
+
 
 #### Docker Image 생성
 ```shell
-docker build -t yoon11/my_mariadb:1.0 .
+docker build -t won1110218/my_mariadb:1.0 .
 ```
 
 #### mariadb 실행
 ```shell
-docker run -d -p 3306:3306  --network ecommerce-network --name mariadb yoon11/my_mariadb:1.0
+docker run -d -p 3306:3306 --network ecommerce-network --name mariadb won1110218/my_mariadb:1.0
 ```
 
 #### mariadb 접속
 ```shell
 docker exec -it mariadb /bin/bash
 mysql -h127.0.0.1 -uroot -p
+```
+```shell
+docker exec -it mariadb /bin/bash
+mariadb -hlocalhost -uroot -p
 ```
 root 권한 허용 root 계정에 어떠한 ip 주소로 접속된다고 하더라도 모든 데이터베이스에 허용할 수 있도록
 
@@ -236,7 +254,7 @@ flush privileges;
 ```
 
 #### 결과
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a049185b-00a0-480b-b8a8-9ec6533e9011" width="60%"/><br>
 - ecommerce-network에 등록된 모습
 
 <br>
@@ -283,6 +301,7 @@ services:
 
 networks:
   my-network:
+    external: true
     name: ecommerce-network # 172.18.0.1~
 ```
 
@@ -290,16 +309,18 @@ networks:
 ```shell
 docker-compose -f docker-compose-single-broker.yml up -d
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/904ee074-8a35-4272-b6c4-b449cf01b66b" width="50%"/><br>
+
 #### docker compose 종료
 ```shell
 docker-compose -f docker-compose-single-broker.yml down -d
 ```
 
 #### 결과
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/599d3677-5528-4c41-b683-a0227eae464a" width="70%"/><br>
 - zookeeper와 kafka가 컨테이너로 실행됨을 확인
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/e24ac59a-cd15-45bd-a9e2-534366b7fbf1" width="60%"/><br>
 - 네트워크에도 compose에 정의한 대로 ip 할당
 
 <br>
@@ -313,6 +334,9 @@ docker run -d -p 9411:9411 \
  openzipkin/zipkin 
 ```
 
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ce865a11-3b99-4a71-b48b-7c55c3dd585f" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c8ae678b-0535-4a77-8c2c-0ea088473239" width="60%"/><br>
+
 <br>
 
 ## Monitoring
@@ -322,60 +346,36 @@ Run Prometheus + Grafana
 docker run -d -p 9090:9090 \
  --network ecommerce-network \
  --name prometheus \
- -v C:\Users\dudwl\Work\prometheus\prometheus-2.39.1.windows-amd64\prometheus-2.39.1.windows-amd64\prometheus.yml:/etc/prometheus/prometheus.yml \
+ -v /Users/choihyewon/Desktop/Work/prometheus-2.51.0.darwin-amd64/prometheus.yml:/etc/prometheus/prometheus.yml \
  prom/prometheus 
 ```
 - 로컬에 존재하는 prometheus.yml을 컨테이너 내부로 복사
 
 #### prometheus.yml 수정
 ```yaml
-# my global config
-global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-  # scrape_timeout is set to the global default (10s).
-
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          # - alertmanager:9093
-
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
-
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
-scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "prometheus"
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
+...
 
     static_configs:
-      - targets: ["prometheus:9090"]
-
-  - job_name: "user-service"
+    - targets: ["prometheus:9090"]
+  - job_name: "users-service"
     scrape_interval: 15s
-    metrics_path: "/user-service/actuator/prometheus"
+    metrics_path: "/users-service/actuator/prometheus"
     static_configs:
-      - targets: ["apigateway-service:8000"]
+    - targets: ["apigateway-service:8000"]
+  - job_name: "orders-service"
+    scrape_interval: 15s
+    metrics_path: "orders-service/actuator/prometheus"
+    static_configs:
+    - targets: ["apigateway-service:8000"]
   - job_name: "apigateway-service"
     scrape_interval: 15s
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["apigateway-service:8000"]
-  - job_name: "order-service"
-    scrape_interval: 15s
-    metrics_path: "order-service/actuator/prometheus"
-    static_configs:
-      - targets: ["apigateway-service:8000"]
-
+    - targets: ["apigateway-service:8000"]
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a4a68da1-edd9-43e1-a5c5-3e9f7db4e1d3" width="60%"/><br>
+
+
 ### Grafana
 ```shell
 docker run -d -p 3000:3000 \
@@ -383,9 +383,12 @@ docker run -d -p 3000:3000 \
  --name grafana \
  grafana/grafana 
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/cdecc38b-2905-4c8b-a3cf-db5c08c6280a" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/f2289921-0523-401e-a868-8479ce1dd77d" width="60%"/><br>
+
 
 #### 현재상황
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/7805830b-87b5-4ae0-a340-d0580a19dd17" width="70%"/><br>
 
 <br>
 
@@ -393,20 +396,30 @@ docker run -d -p 3000:3000 \
 ```dockerfile
 FROM openjdk:17-ea-11-jdk-slim
 VOLUME /tmp
-COPY /target/user-service-1.0.jar UserService.jar
-ENTRYPOINT ["java", "-jar", "UserService.jar"]
+COPY target/users-service-1.0.jar users-service.jar
+ENTRYPOINT ["java", "-jar", "users-service.jar"]
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bdaf2587-10ce-417d-8de5-d2301677b2c4" width="70%"/><br>
+
+#### https://github.com/hyewon218/spring-cloud-config 의 users-service.yml 수정
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/9826b3c4-e915-43b2-bf1c-582c216504a4" width="70%"/><br>
+
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/7abcea47-b17b-4c46-be2c-cdd0b6dc3c9a" width="30%"/><br>
+- docker build -t won1110218/users-service:1.0 .
+- docker push won1110218/users-service:1.0
 
 ```shell
 docker run -d --network ecommerce-network \
-  --name user-service \
+  --name users-service \
  -e "spring.cloud.config.uri=http://config-service:8888" \
  -e "spring.rabbitmq.host=rabbitmq" \
- -e "spring.zipkin.base-url=http://zipkin:9411" \
+ -e "spring.zipkin.base-url=http://zipkin:9411/api/v2/spans" \
  -e "eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/" \
  -e "logging.file=/api-logs/users-ws.log" \
- yoon11/user-service
+ won1110218/users-service:1.0
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4a12274a-f2df-4ad4-b4f1-4e9bc3fa86fd" width="50%"/><br>
 
 <br>
 
@@ -414,22 +427,22 @@ docker run -d --network ecommerce-network \
 ```dockerfile
 FROM openjdk:17-ea-11-jdk-slim
 VOLUME /tmp
-COPY /target/order-service-1.0.jar OrderService.jar
-ENTRYPOINT ["java", "-jar", "UserService.jar"]
+COPY /target/orders-service-1.0.jar orders-service.jar
+ENTRYPOINT ["java", "-jar", "orders-service.jar"]
 ```
 ```shell
 docker run -d --network ecommerce-network \
-  --name order-service \
- -e "spring.cloud.config.uri=http://config-service:8888" \
+  --name orders-service \
+ -e "spring.cloud.config.uri=http://config-server:8888" \
  -e "spring.rabbitmq.host=rabbitmq" \
- -e "spring.zipkin.base-url=http://zipkin:9411" \
+ -e "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans" \
  -e "eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/" \
  -e "spring.datasource.url=jdbc:mariadb://mariadb:3306/mydb" \
  -e "logging.file=/api-logs/orders-ws.log" \
- yoon11/order-service:1.0
+ won1110218/orders-service:1.0
 ```
 
-### KafkaProducerConfig - 메시지 보낼때 사용하는 설정 변경
+### KafkaProducerConfig - 메시지 보낼때 사용하는 설정(ip) 변경
 ```java
 @Configuration
 public class KafkaProducerConfig {
@@ -452,7 +465,7 @@ public class KafkaProducerConfig {
 ```
 
 #### mariadb 모든 ip 허용
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+
 
 <br>
 
@@ -461,18 +474,18 @@ public class KafkaProducerConfig {
 ```dockerfile
 FROM openjdk:17-ea-11-jdk-slim
 VOLUME /tmp
-COPY /target/catalog-service-1.0.jar CatalogService.jar
-ENTRYPOINT ["java", "-jar", "CatalogService.jar"]
+COPY /target/catalogs-service-1.0.jar catalogs-service.jar
+ENTRYPOINT ["java", "-jar", "catalogs-service.jar"]
 ```
 
 ```shell
 docker run -d --network ecommerce-network \
-  --name catalog-service \
+  --name catalogs-service \
  -e "spring.cloud.config.uri=http://config-service:8888" \
  -e "spring.rabbitmq.host=rabbitmq" \
  -e "eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/" \
  -e "logging.file=/api-logs/catalogs-ws.log" \
- yoon11/catalog-service:1.0
+ won1110218/catalogs-service:1.0
 ```
 
 #### KafkaConsumerConfig
@@ -504,8 +517,8 @@ public class KafkaConsumerConfig {
 ```
 
 #### Multi Profiles
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/bd3c7cc5-c198-4520-97bc-b143eef880fe" width="60%"/><br>
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/efbaba50-3267-44b7-a631-0220c2d3b723" width="60%"/><br>
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/d803bd77-4868-48bb-a26e-573614152217" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/ddd1d02c-24c7-45c9-80b6-27f0047aa983" width="60%"/><br>

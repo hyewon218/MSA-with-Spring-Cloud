@@ -72,18 +72,28 @@ docker hub 에서 다운받아서 실행하기
 ## 컨테이너 생성과 실행
 컨테이너 생성
 ```shell
-$ docker run -d -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true --name mysql mysql:5.7
+$ docker run -d -p 3307:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true --name mysql --platform linux/amd64 mysql:5.7
+```
+```shell
+$ docker run -d -p 3307:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true --name mariadb mariadb:latest
 ```
 - 앞 포트번호 : host pc 에서 접근하고자 하는 포트 번호
 - 뒤 포트번호 : 컨테이너에서 응답하기 위한 포트 번호 
-- 컨테이너 안에 있는 3306 포트와 host pc 가 가진 3306 포트 연결해서 host pc 에서 접속을 해서 사용할 수 있도록 
+- 컨테이너 안에 있는 3306 포트와 host pc 가 가진 3307 포트 연결해서 host pc 에서 접속을 해서 사용할 수 있도록 
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/4d94c9b9-90d0-43e5-933b-952a3231fe9a" width="60%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/373b8a6d-ca60-4dc8-b7ab-dfb17226c90b" width="60%"/><br>
+
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/a964b8e1-7286-4649-a91c-c982cf6ea69f" width="60%"/><br>
+
 
 컨테이너 실행
 ```shell
 $ docker exec -it mysql bash
 ```
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/704ccfc7-e613-43b1-a41d-b64fb5ec137e" width="60%"/><br>
 
-<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/c3377cf5-c65f-4136-8e12-dd0336c96678" width="50%"/><br>
+<img src="https://github.com/hyewon218/kim-jpa2/assets/126750615/f5a830de-2fa5-46aa-9996-ca31694816ce" width="60%"/><br>
 
 ## Docker 이미지 생성과 Public registry에 Push
 ### Dockerfile for Users Microservice
